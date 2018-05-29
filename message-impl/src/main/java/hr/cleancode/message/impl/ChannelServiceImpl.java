@@ -8,6 +8,7 @@ import com.lightbend.lagom.javadsl.persistence.PersistentEntityRegistry;
 import hr.cleancode.message.api.Channel;
 import hr.cleancode.message.api.ChannelCreate;
 import hr.cleancode.message.api.ChannelService;
+import hr.cleancode.message.api.UniqueLock;
 import hr.cleancode.message.api.UniqueLockService;
 
 import java.time.ZonedDateTime;
@@ -34,8 +35,9 @@ public class ChannelServiceImpl implements ChannelService {
             final Channel channel = new Channel(channelId, request.getCreatedId(), ZonedDateTime.now(), request.getTitle());
             final ChannelCommand.CreateChannelCommand cmd = ChannelCommand.CreateChannelCommand.of(channel);
             PersistentEntityRef<ChannelCommand> ref = entityRef(channelId);
+            UniqueLock lock = UniqueLock.forValues(Channel.class, channel.getTitle());
             return uniqueLockService
-                    .placeLock(request.getTitle()).invoke(request.getTitle())
+                    .placeLock().invoke(lock)
                     .thenCompose(lockId -> ref.ask(cmd).thenApply(done -> channel));
         };
     }

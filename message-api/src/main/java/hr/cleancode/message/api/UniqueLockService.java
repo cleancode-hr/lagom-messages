@@ -1,5 +1,6 @@
 package hr.cleancode.message.api;
 
+import akka.Done;
 import com.lightbend.lagom.javadsl.api.Descriptor;
 import com.lightbend.lagom.javadsl.api.Service;
 import com.lightbend.lagom.javadsl.api.ServiceCall;
@@ -10,9 +11,9 @@ import static com.lightbend.lagom.javadsl.api.Service.restCall;
 
 public interface UniqueLockService extends Service {
 
-    ServiceCall<String, String> placeLock(String lockId);
+    ServiceCall<UniqueLock, Done> placeLock();
 
-    ServiceCall<String, String> getLock(String lockId);
+    ServiceCall<String, UniqueLock> getLock(String lockId);
 
     ServiceCall<String, String> removeLock(String lockId);
 

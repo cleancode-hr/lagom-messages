@@ -6,17 +6,22 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
-import java.time.ZonedDateTime;
-
 @Value
 @JsonDeserialize
 @Builder
 @AllArgsConstructor
 public class UniqueLock {
     private String id;
-    private ZonedDateTime createdAt;
 
-    public static String determineId(String...parts) {
-        return Strings.join(parts, "#");
+    public static UniqueLock of(String id) {
+        return new UniqueLock(id);
+    }
+
+    public static UniqueLock forValues(String entityName, String...values) {
+        return new UniqueLock(entityName + "#" + Strings.join(values, "#"));
+    }
+
+    public static UniqueLock forValues(Class<?> entityClass, String...values) {
+        return forValues(entityClass.getName(), values);
     }
 }

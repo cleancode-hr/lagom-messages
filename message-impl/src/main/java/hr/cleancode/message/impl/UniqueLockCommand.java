@@ -8,12 +8,14 @@ import lombok.AllArgsConstructor;
 import lombok.Value;
 import lombok.experimental.Wither;
 
+import java.util.Optional;
+
 public interface UniqueLockCommand extends Jsonable {
 
     @Value
     @Wither
     @AllArgsConstructor(staticName = "of")
-    class GetLockCommand implements UniqueLockCommand, PersistentEntity.ReplyType<String> {
+    class GetLockCommand implements UniqueLockCommand, PersistentEntity.ReplyType<Optional<UniqueLock>> {
         String lockId;
     }
 
@@ -21,7 +23,7 @@ public interface UniqueLockCommand extends Jsonable {
     @Wither
     @AllArgsConstructor(staticName = "of")
     class PlaceLockCommand implements UniqueLockCommand, PersistentEntity.ReplyType<Done> {
-        String lockId;
+        UniqueLock lock;
     }
 
     @Value

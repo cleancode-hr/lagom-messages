@@ -1,6 +1,7 @@
 package hr.cleancode.message.impl;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import hr.cleancode.message.api.UniqueLock;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
@@ -12,7 +13,7 @@ import lombok.experimental.Wither;
 @AllArgsConstructor(onConstructor = @__(@JsonCreator))
 public class UniqueLockState {
 
-    private String lockId;
+    private UniqueLock lock;
 
     private UniqueLockStatus status;
 
@@ -20,7 +21,7 @@ public class UniqueLockState {
         return new UniqueLockState(null, UniqueLockStatus.NOT_PLACED);
     }
 
-    public static UniqueLockState placed(String lockId) {
-        return new UniqueLockState(lockId, UniqueLockStatus.PLACED);
+    public static UniqueLockState placed(UniqueLock lock) {
+        return new UniqueLockState(lock, UniqueLockStatus.PLACED);
     }
 }

@@ -2,6 +2,7 @@ package hr.cleancode.message.impl;
 
 import akka.Done;
 import com.lightbend.lagom.javadsl.persistence.PersistentEntity;
+import hr.cleancode.message.api.UniqueLock;
 
 import java.util.Optional;
 
@@ -24,13 +25,11 @@ public class UniqueLockEntity extends PersistentEntity<UniqueLockCommand, Unique
         BehaviorBuilder b = newBehaviorBuilder(UniqueLockState.notPlaced());
 
         b.setCommandHandler(UniqueLockCommand.PlaceLockCommand.class, (cmd, ctx) -> {
-            UniqueLockEvent event = new UniqueLockEvent.UniqueLockPlaced.UniqueLockPlacedBuilder()
-                    .id(cmd.getLockId())
-                    .build();
+            UniqueLockEvent event = new UniqueLockEvent.UniqueLockPlaced(cmd.getLock());
             return ctx.thenPersist(event, (evt) -> ctx.reply(Done.getInstance()));
         });
         b.setReadOnlyCommandHandler(UniqueLockCommand.GetLockCommand.class, (cmd, ctx) -> {
-            ctx.reply("");
+            ctx.reply(Optional.empty());
         });
         b.setEventHandlerChangingBehavior(UniqueLockEvent.UniqueLockPlaced.class, evt -> placed(UniqueLockState.placed(evt.getId())));
         return b.build();
@@ -39,13 +38,11 @@ public class UniqueLockEntity extends PersistentEntity<UniqueLockCommand, Unique
     private Behavior placed(UniqueLockState state) {
         BehaviorBuilder b = newBehaviorBuilder(state);
         b.setCommandHandler(UniqueLockCommand.DeleteLock.class, (cmd, ctx) -> {
-            UniqueLockEvent event = new UniqueLockEvent.UniqueLockRemoved.UniqueLockRemovedBuilder()
-                    .id(cmd.getLockId())
-                    .build();
+            UniqueLockEvent event = new UniqueLockEvent.UniqueLockRemoved(UniqueLock.of(cmd.getLockId()));
             return ctx.thenPersist(event, (evt) -> ctx.reply(Done.getInstance()));
         });
         b.setReadOnlyCommandHandler(UniqueLockCommand.GetLockCommand.class, (cmd, ctx) -> {
-            ctx.reply(state.getLockId());
+            ctx.reply(Optional.of(state.getLock()));
         });
         b.setEventHandlerChangingBehavior(UniqueLockEvent.UniqueLockRemoved.class, evt -> notPlaced());
         return b.build();

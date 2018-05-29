@@ -6,6 +6,7 @@ import com.lightbend.lagom.javadsl.persistence.AggregateEventShards;
 import com.lightbend.lagom.javadsl.persistence.AggregateEventTag;
 import com.lightbend.lagom.javadsl.persistence.AggregateEventTagger;
 import com.lightbend.lagom.serialization.Jsonable;
+import hr.cleancode.message.api.UniqueLock;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
@@ -20,17 +21,15 @@ public interface UniqueLockEvent extends Jsonable, AggregateEvent<UniqueLockEven
     }
 
     @Value
-    @Builder
     @AllArgsConstructor(onConstructor = @__(@JsonCreator))
     class UniqueLockPlaced implements UniqueLockEvent {
-        String id;
+        UniqueLock id;
     }
 
     @Value
-    @Builder
     @AllArgsConstructor(onConstructor = @__(@JsonCreator))
     class UniqueLockRemoved implements UniqueLockEvent {
-        String id;
+        UniqueLock id;
     }
 
 }
