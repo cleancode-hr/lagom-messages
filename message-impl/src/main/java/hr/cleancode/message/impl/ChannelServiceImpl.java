@@ -8,6 +8,7 @@ import com.lightbend.lagom.javadsl.persistence.PersistentEntityRegistry;
 import hr.cleancode.message.api.Channel;
 import hr.cleancode.message.api.ChannelCreate;
 import hr.cleancode.message.api.ChannelService;
+import hr.cleancode.message.api.UniqueLockService;
 
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -17,9 +18,12 @@ public class ChannelServiceImpl implements ChannelService {
 
     private final PersistentEntityRegistry persistentEntities;
 
+    private final UniqueLockService uniqueLockService;
+
     @Inject
-    public ChannelServiceImpl(PersistentEntityRegistry persistentEntities) {
+    public ChannelServiceImpl(PersistentEntityRegistry persistentEntities, UniqueLockService uniqueLockService) {
         this.persistentEntities = persistentEntities;
+        this.uniqueLockService = uniqueLockService;
         persistentEntities.register(ChannelEntity.class);
     }
 
@@ -27,9 +31,12 @@ public class ChannelServiceImpl implements ChannelService {
     public ServiceCall<ChannelCreate, Channel> createChannel() {
         return request -> {
             final UUID channelId = UUID.randomUUID();
-            Channel channel = new Channel(channelId, request.getCreatedId(), ZonedDateTime.now(), request.getTitle());
-            ChannelCommand.CreateChannelCommand cmd = ChannelCommand.CreateChannelCommand.of(channel);
-            return entityRef(channelId).ask(cmd).thenApply(done -> channel);
+            final Channel channel = new Channel(channelId, request.getCreatedId(), ZonedDateTime.now(), request.getTitle());
+            final ChannelCommand.CreateChannelCommand cmd = ChannelCommand.CreateChannelCommand.of(channel);
+            PersistentEntityRef<ChannelCommand> ref = entityRef(channelId);
+            return uniqueLockService
+                    .placeLock(request.getTitle()).invoke(request.getTitle())
+                    .thenCompose(lockId -> ref.ask(cmd).thenApply(done -> channel));
         };
     }
 

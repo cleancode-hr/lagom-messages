@@ -18,7 +18,7 @@ public class ChannelEntity extends PersistentEntity<ChannelCommand, ChannelEvent
             case CREATED:
                 return created(snapshotState.get());
             default:
-                throw new IllegalStateException("Unknown status of payroll: " + status);
+                throw new IllegalStateException("Unknown status of channel: " + status);
         }
     }
 

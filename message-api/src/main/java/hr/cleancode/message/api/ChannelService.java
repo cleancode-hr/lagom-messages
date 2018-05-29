@@ -1,12 +1,18 @@
 package hr.cleancode.message.api;
 
 import akka.NotUsed;
+import akka.util.ByteString;
 import com.lightbend.lagom.javadsl.api.Descriptor;
 import com.lightbend.lagom.javadsl.api.Service;
 import com.lightbend.lagom.javadsl.api.ServiceCall;
+import com.lightbend.lagom.javadsl.api.deser.ExceptionSerializer;
 import com.lightbend.lagom.javadsl.api.deser.PathParamSerializers;
+import com.lightbend.lagom.javadsl.api.deser.RawExceptionMessage;
+import com.lightbend.lagom.javadsl.api.transport.MessageProtocol;
 import com.lightbend.lagom.javadsl.api.transport.Method;
+import com.lightbend.lagom.javadsl.api.transport.TransportErrorCode;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 

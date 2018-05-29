@@ -15,9 +15,9 @@ import static com.lightbend.lagom.javadsl.api.Service.restCall;
 
 public interface MessageService extends Service {
 
-    ServiceCall<MessageDto, String> createMessage();
+    ServiceCall<Message, String> createMessage();
 
-    ServiceCall<NotUsed, Optional<MessageDto>> getMessage(UUID id);
+    ServiceCall<NotUsed, Optional<Message>> getMessage(UUID id);
 
     @Override
     default Descriptor descriptor() {
