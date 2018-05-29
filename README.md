@@ -1,0 +1,2 @@
+# lagom-messages
+Testing lagom
