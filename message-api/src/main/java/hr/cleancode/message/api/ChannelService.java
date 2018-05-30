@@ -13,6 +13,7 @@ import com.lightbend.lagom.javadsl.api.transport.Method;
 import com.lightbend.lagom.javadsl.api.transport.TransportErrorCode;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,9 +26,12 @@ public interface ChannelService extends Service {
 
     ServiceCall<NotUsed, Optional<Channel>> getChannel(UUID id);
 
+    ServiceCall<NotUsed, List<Channel>> getChannels();
+
     @Override
     default Descriptor descriptor() {
         return named("channelService").withCalls(
+                restCall(Method.GET, "/channels", this::getChannels),
                 restCall(Method.POST, "/channels", this::createChannel),
                 restCall(Method.GET, "/channels/:channelId", this::getChannel)
         ).withAutoAcl(true)

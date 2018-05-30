@@ -23,13 +23,13 @@ public interface UniqueLockEvent extends Jsonable, AggregateEvent<UniqueLockEven
     @Value
     @AllArgsConstructor(onConstructor = @__(@JsonCreator))
     class UniqueLockPlaced implements UniqueLockEvent {
-        UniqueLock id;
+        UniqueLock lock;
     }
 
     @Value
     @AllArgsConstructor(onConstructor = @__(@JsonCreator))
     class UniqueLockRemoved implements UniqueLockEvent {
-        UniqueLock id;
+        UniqueLock lock;
     }
 
 }

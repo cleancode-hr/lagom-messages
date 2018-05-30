@@ -1,6 +1,7 @@
 package hr.cleancode.message.impl;
 
 import akka.Done;
+import com.lightbend.lagom.javadsl.api.transport.BadRequest;
 import com.lightbend.lagom.javadsl.persistence.PersistentEntity;
 import hr.cleancode.message.api.UniqueLock;
 
@@ -31,7 +32,7 @@ public class UniqueLockEntity extends PersistentEntity<UniqueLockCommand, Unique
         b.setReadOnlyCommandHandler(UniqueLockCommand.GetLockCommand.class, (cmd, ctx) -> {
             ctx.reply(Optional.empty());
         });
-        b.setEventHandlerChangingBehavior(UniqueLockEvent.UniqueLockPlaced.class, evt -> placed(UniqueLockState.placed(evt.getId())));
+        b.setEventHandlerChangingBehavior(UniqueLockEvent.UniqueLockPlaced.class, evt -> placed(UniqueLockState.placed(evt.getLock())));
         return b.build();
     }
 
@@ -40,6 +41,9 @@ public class UniqueLockEntity extends PersistentEntity<UniqueLockCommand, Unique
         b.setCommandHandler(UniqueLockCommand.DeleteLock.class, (cmd, ctx) -> {
             UniqueLockEvent event = new UniqueLockEvent.UniqueLockRemoved(UniqueLock.of(cmd.getLockId()));
             return ctx.thenPersist(event, (evt) -> ctx.reply(Done.getInstance()));
+        });
+        b.setReadOnlyCommandHandler(UniqueLockCommand.PlaceLockCommand.class, (cmd, ctx) -> {
+            throw new BadRequest("Lock already placed");
         });
         b.setReadOnlyCommandHandler(UniqueLockCommand.GetLockCommand.class, (cmd, ctx) -> {
             ctx.reply(Optional.of(state.getLock()));

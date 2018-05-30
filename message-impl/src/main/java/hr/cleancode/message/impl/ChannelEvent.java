@@ -20,6 +20,8 @@ public interface ChannelEvent extends Jsonable, AggregateEvent<ChannelEvent> {
         return TAG;
     }
 
+    Channel getChannel();
+
     @Value
     @Builder
     @AllArgsConstructor(onConstructor = @__(@JsonCreator))

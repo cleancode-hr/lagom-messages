@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.lightbend.lagom.javadsl.api.ServiceCall;
 import com.lightbend.lagom.javadsl.persistence.PersistentEntityRef;
 import com.lightbend.lagom.javadsl.persistence.PersistentEntityRegistry;
+import com.lightbend.lagom.javadsl.persistence.ReadSide;
 import hr.cleancode.message.api.Channel;
 import hr.cleancode.message.api.ChannelCreate;
 import hr.cleancode.message.api.ChannelService;
@@ -12,8 +13,10 @@ import hr.cleancode.message.api.UniqueLock;
 import hr.cleancode.message.api.UniqueLockService;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class ChannelServiceImpl implements ChannelService {
 
@@ -21,11 +24,15 @@ public class ChannelServiceImpl implements ChannelService {
 
     private final UniqueLockService uniqueLockService;
 
+    private final ChannelRepository channelRepository;
+
     @Inject
-    public ChannelServiceImpl(PersistentEntityRegistry persistentEntities, UniqueLockService uniqueLockService) {
+    public ChannelServiceImpl(final ReadSide readSide, PersistentEntityRegistry persistentEntities, UniqueLockService uniqueLockService, ChannelRepository channelRepository) {
         this.persistentEntities = persistentEntities;
         this.uniqueLockService = uniqueLockService;
+        this.channelRepository = channelRepository;
         persistentEntities.register(ChannelEntity.class);
+        readSide.register(ChannelEventProcessor.class);
     }
 
     @Override
@@ -35,6 +42,7 @@ public class ChannelServiceImpl implements ChannelService {
             final Channel channel = new Channel(channelId, request.getCreatedId(), ZonedDateTime.now(), request.getTitle());
             final ChannelCommand.CreateChannelCommand cmd = ChannelCommand.CreateChannelCommand.of(channel);
             PersistentEntityRef<ChannelCommand> ref = entityRef(channelId);
+//            return ref.ask(cmd).thenApply(done -> channel);
             UniqueLock lock = UniqueLock.forValues(Channel.class, channel.getTitle());
             return uniqueLockService
                     .placeLock().invoke(lock)
@@ -45,6 +53,11 @@ public class ChannelServiceImpl implements ChannelService {
     @Override
     public ServiceCall<NotUsed, Optional<Channel>> getChannel(UUID id) {
         return request -> entityRef(id).ask(ChannelCommand.GetChannel.of(id));
+    }
+
+    @Override
+    public ServiceCall<NotUsed, List<Channel>> getChannels() {
+        return request -> CompletableFuture.supplyAsync(() -> channelRepository.findAll());
     }
 
     private PersistentEntityRef<ChannelCommand> entityRef(UUID channelId) {

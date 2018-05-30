@@ -12,5 +12,6 @@ public class ChannelModule extends AbstractModule implements ServiceGuiceSupport
     protected void configure() {
         bindService(ChannelService.class, ChannelServiceImpl.class);
         bind(UniqueLockService.class).to(UniqueLockServiceImpl.class);
+        bind(ChannelRepository.class);
     }
 }
