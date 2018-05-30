@@ -15,7 +15,7 @@ public interface UniqueLockService extends Service {
 
     ServiceCall<String, UniqueLock> getLock(String lockId);
 
-    ServiceCall<String, String> removeLock(String lockId);
+    ServiceCall<String, Done> removeLock(String lockId);
 
     @Override
     default Descriptor descriptor() {

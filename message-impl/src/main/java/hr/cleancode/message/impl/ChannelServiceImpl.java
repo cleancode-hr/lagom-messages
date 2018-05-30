@@ -40,13 +40,12 @@ public class ChannelServiceImpl implements ChannelService {
         return request -> {
             final UUID channelId = UUID.randomUUID();
             final Channel channel = new Channel(channelId, request.getCreatedId(), ZonedDateTime.now(), request.getTitle());
-            final ChannelCommand.CreateChannelCommand cmd = ChannelCommand.CreateChannelCommand.of(channel);
-            PersistentEntityRef<ChannelCommand> ref = entityRef(channelId);
-//            return ref.ask(cmd).thenApply(done -> channel);
-            UniqueLock lock = UniqueLock.forValues(Channel.class, channel.getTitle());
+            final ChannelCommand.CreateChannelCommand createChannelCommand = ChannelCommand.CreateChannelCommand.of(channel);
+            final PersistentEntityRef<ChannelCommand> channelEntity = entityRef(channelId);
+            final UniqueLock uniqueTitleLock = UniqueLock.forValues(Channel.class, channel.getTitle());
             return uniqueLockService
-                    .placeLock().invoke(lock)
-                    .thenCompose(lockId -> ref.ask(cmd).thenApply(done -> channel));
+                    .placeLock().invoke(uniqueTitleLock)
+                    .thenCompose(lockId -> channelEntity.ask(createChannelCommand).thenApply(done -> channel));
         };
     }
 

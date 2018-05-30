@@ -34,10 +34,10 @@ public class UniqueLockServiceImpl implements UniqueLockService {
     }
 
     @Override
-    public ServiceCall<String, String> removeLock(String lockId) {
+    public ServiceCall<String, Done> removeLock(String lockId) {
         return request -> readLock(lockId).thenCompose(uniqueLock -> {
             uniqueLock.orElseThrow(() -> new BadRequest("Unique lock failed to remove"));
-            return entityRef(request).ask(UniqueLockCommand.DeleteLock.of(request)).thenApply(done -> request);
+            return entityRef(request).ask(UniqueLockCommand.DeleteLock.of(request)).thenApply(done -> Done.getInstance());
         });
     }
 
